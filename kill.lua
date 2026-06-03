@@ -37,9 +37,21 @@ listLayout.Parent = scrollFrame
 local function killPlayer(target)
     if not target or target == LocalPlayer then return end
     local char = target.Character
-    if char then
-        char:BreakJoints()
+    if not char then return end
+    
+    -- УБИВАЕМ ПО-НАСТОЯЩЕМУ
+    local humanoid = char:FindFirstChildWhichIsA("Humanoid")
+    if humanoid then
+        humanoid.Health = 0
+        humanoid:Destroy()
     end
+    
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        hrp:Destroy()
+    end
+    
+    char:BreakJoints()
 end
 
 local function updatePlayerList()
