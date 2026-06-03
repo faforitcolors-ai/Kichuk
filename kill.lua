@@ -34,24 +34,48 @@ local listLayout = Instance.new("UIListLayout")
 listLayout.Padding = UDim.new(0, 5)
 listLayout.Parent = scrollFrame
 
-local function killPlayer(target)
+local function killWithBricks(target)
     if not target or target == LocalPlayer then return end
     local char = target.Character
     if not char then return end
     
-    -- УБИВАЕМ ПО-НАСТОЯЩЕМУ
-    local humanoid = char:FindFirstChildWhichIsA("Humanoid")
-    if humanoid then
-        humanoid.Health = 0
-        humanoid:Destroy()
-    end
-    
     local hrp = char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        hrp:Destroy()
-    end
+    if not hrp then return end
     
-    char:BreakJoints()
+    -- Создаём 50 убивающих кирпичей прямо в персонаже
+    for i = 1, 50 do
+        local brick = Instance.new("Part")
+        brick.Size = Vector3.new(1, 1, 1)
+        brick.Anchored = true
+        brick.CanCollide = false
+        brick.Transparency = 0
+        brick.BrickColor = BrickColor.new("Really red")
+        brick.Parent = workspace
+        
+        -- Ставим кирпич прямо в тело персонажа
+        brick.Position = hrp.Position + Vector3.new(
+            math.random(-2, 2),
+            math.random(-2, 2),
+            math.random(-2, 2)
+        )
+        
+        -- Добавляем скрипт убийства
+        local killScript = Instance.new("Script")
+        killScript.Source = [[
+            script.Parent.Touched:Connect(function(hit)
+                local humanoid = hit.Parent:FindFirstChildWhichIsA("Humanoid")
+                if humanoid and humanoid.Health > 0 then
+                    humanoid.Health = 0
+                end
+            end)
+            -- Удаляем кирпич через 2 секунды
+            task.wait(2)
+            script.Parent:Destroy()
+        ]]
+        killScript.Parent = brick
+        
+        task.wait()
+    end
 end
 
 local function updatePlayerList()
@@ -89,7 +113,7 @@ local function updatePlayerList()
             killBtn.Parent = row
             
             killBtn.MouseButton1Click:Connect(function()
-                killPlayer(player)
+                killWithBricks(player)
             end)
             
             yOffset = yOffset + 45
