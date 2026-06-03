@@ -1,16 +1,14 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "SlayerGUI"
+screenGui.Name = "RealKillGUI"
 screenGui.Parent = game.CoreGui
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 220, 0, 350)
 mainFrame.Position = UDim2.new(0.5, -110, 0.5, -175)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-mainFrame.BackgroundTransparency = 0.1
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Parent = screenGui
@@ -39,11 +37,11 @@ listLayout.Parent = playerList
 local killBtn = Instance.new("TextButton")
 killBtn.Size = UDim2.new(1, -10, 0, 40)
 killBtn.Position = UDim2.new(0, 5, 1, -50)
-killBtn.Text = "УБИТЬ"
+killBtn.Text = "УБИТЬ (РЕАЛЬНО)"
 killBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
 killBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 killBtn.Font = Enum.Font.GothamBold
-killBtn.TextSize = 16
+killBtn.TextSize = 14
 killBtn.Parent = mainFrame
 
 local selectedPlayer = nil
@@ -80,13 +78,20 @@ local function updateList()
     playerList.CanvasSize = UDim2.new(0, 0, 0, yOffset)
 end
 
-local function killPlayer(target)
+local function realKill(target)
     if target and target ~= LocalPlayer then
         local char = target.Character
         if char then
-            local hum = char:FindFirstChildWhichIsA("Humanoid")
-            if hum and hum.Health > 0 then
-                hum.Health = 0
+            -- Способ 1: Удалить HumanoidRootPart
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp:Destroy()
+            end
+            -- Способ 2: Сломать все суставы (работает чаще)
+            for _, v in pairs(char:GetChildren()) do
+                if v:IsA("BasePart") then
+                    v:BreakJoints()
+                end
             end
         end
     end
@@ -94,7 +99,7 @@ end
 
 killBtn.MouseButton1Click:Connect(function()
     if selectedPlayer then
-        killPlayer(selectedPlayer)
+        realKill(selectedPlayer)
         selectedPlayer = nil
         updateList()
     end
